@@ -16,8 +16,10 @@
             margin-bottom: 15px;
         }
         .story {
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             line-height: 1.4;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
         .title-link {
             color: #000;
@@ -48,6 +50,19 @@
         .refresh:hover {
             background-color: #ff8533;
         }
+        .tags {
+            margin-top: 5px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #f0f0f0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 8pt;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +76,13 @@
         <a href="{{ story.url }}" class="title-link">{{ story.title }}</a>
         {% if story.source %}
         <span class="source"> ({{ story.source }})</span>
+        {% endif %}
+        {% if story.tags %}
+        <div class="tags">
+            {% for tag in story.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
         {% endif %}
     </div>
     {% endfor %}

@@ -2,8 +2,14 @@ from flask import Flask, render_template
 import requests
 from bs4 import BeautifulSoup
 import os
+from anthropic import Anthropic
+import time
 
 app = Flask(__name__)
+
+ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
+
+anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 def ensure_templates_directory():
     os.makedirs('templates', exist_ok=True)
@@ -27,8 +33,10 @@ def create_template():
             margin-bottom: 15px;
         }
         .story {
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             line-height: 1.4;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
         .title-link {
             color: #000;
@@ -59,6 +67,19 @@ def create_template():
         .refresh:hover {
             background-color: #ff8533;
         }
+        .tags {
+            margin-top: 5px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #f0f0f0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 8pt;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -73,6 +94,13 @@ def create_template():
         {% if story.source %}
         <span class="source"> ({{ story.source }})</span>
         {% endif %}
+        {% if story.tags %}
+        <div class="tags">
+            {% for tag in story.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
 </body>
@@ -86,6 +114,31 @@ def extract_site_from_href(href):
     if href and 'from?site=' in href:
         return href.split('from?site=')[1].rstrip(')')
     return None
+
+def get_content_tags(title):
+    try:
+        # Create a prompt for Claude
+        prompt = f"""Based on this article title: "{title}"
+        Please generate exactly 5 short, relevant content tags (1-2 words each) that categorize what this article might be about.
+        Return only the tags separated by commas, nothing else."""
+        
+        # Get Claude's response
+        response = anthropic.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=100,
+            temperature=0.5,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        # Split the response into tags and clean them
+        tags = [tag.strip() for tag in response.content[0].text.split(',')]
+        return tags[:5]  # Ensure we only return 5 tags
+        
+    except Exception as e:
+        print(f"Error getting tags: {str(e)}")
+        return []
 
 def scrape_hackernews():
     try:
@@ -109,12 +162,19 @@ def scrape_hackernews():
                             if source_link and source_link.get('href'):
                                 source = extract_site_from_href(source_link['href'])
                         
+                        title = main_link.text.strip()
+                        # Get tags from Claude
+                        tags = get_content_tags(title)
+                        
                         story = {
-                            'title': main_link.text.strip(),
+                            'title': title,
                             'url': main_link['href'],
-                            'source': source
+                            'source': source,
+                            'tags': tags
                         }
                         stories.append(story)
+                        # Add a small delay to avoid hitting API rate limits
+                        time.sleep(0.5)
         
         return stories
         
