@@ -21,6 +21,11 @@ def create_template():
             padding: 20px;
             background-color: #f6f6ef;
         }
+        .header {
+            color: #ff6600;
+            font-size: 13pt;
+            margin-bottom: 15px;
+        }
         .story {
             margin-bottom: 8px;
             line-height: 1.4;
@@ -49,6 +54,7 @@ def create_template():
             text-decoration: none;
             border-radius: 5px;
             margin-bottom: 20px;
+            font-size: 10pt;
         }
         .refresh:hover {
             background-color: #ff8533;
@@ -56,6 +62,9 @@ def create_template():
     </style>
 </head>
 <body>
+    <div class="header">
+        <b>Hacker News Top Stories</b>
+    </div>
     <a href="/" class="refresh">Refresh Stories</a>
     {% for story in stories %}
     <div class="story">
@@ -122,4 +131,3 @@ if __name__ == '__main__':
     ensure_templates_directory()
     create_template()
     app.run(debug=True)
-
