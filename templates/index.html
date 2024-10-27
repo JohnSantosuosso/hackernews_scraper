@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hacker News</title>
+    <style>
+        body {
+            font-family: Verdana, Geneva, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f6f6ef;
+        }
+        .story {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .title-link {
+            color: #000;
+            text-decoration: none;
+        }
+        .title-link:hover {
+            text-decoration: underline;
+        }
+        .source {
+            color: #828282;
+            font-size: 8pt;
+        }
+        .number {
+            color: #828282;
+            font-size: 10pt;
+            margin-right: 5px;
+        }
+        .refresh {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ff6600;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .refresh:hover {
+            background-color: #ff8533;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="refresh">Refresh Stories</a>
+    {% for story in stories %}
+    <div class="story">
+        <span class="number">{{ loop.index }}.</span>
+        <a href="{{ story.url }}" class="title-link">{{ story.title }}</a>
+        {% if story.source %}
+        <span class="source"> ({{ story.source }})</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html>
